@@ -107,7 +107,7 @@ button.link,a.link{font:inherit;font-size:.82rem;color:var(--omen);background:no
     <div class="totals"><div class="total"><span class="lbl">Coletáveis</span><b id="totC">0/140</b><span class="meter"><i id="meterC"></i></span></div><div class="total"><span class="lbl">Caixas rígidas</span><b id="totH">0/125</b><span class="meter h"><i id="meterH"></i></span></div><div class="total"><span class="lbl">Missões secund.</span><b id="totS">0/17</b><span class="meter s"><i id="meterS"></i></span></div></div>
     <p class="sync" id="sync" data-state="off" role="status">Salvando neste aparelho</p>
     <button class="link" id="restore" hidden>Restaurar backup</button>
-    <div class="bk"><button class="link" id="exp">Exportar progresso</button><button class="link" id="imp">Importar progresso</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>
+    <div class="bk"><button class="link" id="exp">Exportar progresso</button><button class="link" id="imp">Importar progresso</button><input type="file" id="impFile" hidden></div>
     <div class="tabs" role="tablist" id="tabs"></div>
     <input type="search" id="q" class="search" placeholder="Buscar no ato: ex. Striga, Snub, banca, estacionamento…" aria-label="Buscar">
     <div class="opts">
@@ -153,6 +153,16 @@ document.getElementById("impFile").onchange=async e=>{
   catch(err){alert("Arquivo inválido.")}
   e.target.value="";
 };
+// Link de importação: #importar=<bits na ordem de DATA.items, base64url>
+(function(){
+  const m=location.hash.match(/importar=([A-Za-z0-9_-]+)/); if(!m) return;
+  history.replaceState(null,"",location.pathname+location.search);
+  const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  let add=0;
+  for(let i=0;i<m[1].length;i++){const v=B64.indexOf(m[1][i]);
+    for(let b=0;b<6;b++) if((v>>(5-b))&1){const it=items[i*6+b]; if(it&&!got[it.id]){got[it.id]=1;add++}}}
+  save(); setTimeout(()=>alert(add+" marcações importadas."),300);
+})();
 const acts=[1,2,3,4,5];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let q="";
