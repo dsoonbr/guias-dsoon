@@ -94,7 +94,7 @@ button.link,a.link{font:inherit;font-size:.82rem;color:var(--omen);background:no
 .src{margin-top:34px;font-size:.82rem;color:var(--muted)}
 .src a{color:var(--muted)}
 .back{display:inline-block;margin:0 0 10px;font-size:.9rem;color:var(--muted);text-decoration:none;padding:6px 0}
-.bk{display:flex;gap:16px;margin-top:4px}
+.bk{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:4px}
 @media (prefers-reduced-motion: reduce){.meter i{transition:none}}
 </style>
 
@@ -107,7 +107,7 @@ button.link,a.link{font:inherit;font-size:.82rem;color:var(--omen);background:no
     <div class="totals"><div class="total"><span class="lbl">Coletáveis</span><b id="totC">0/140</b><span class="meter"><i id="meterC"></i></span></div><div class="total"><span class="lbl">Caixas rígidas</span><b id="totH">0/125</b><span class="meter h"><i id="meterH"></i></span></div><div class="total"><span class="lbl">Missões secund.</span><b id="totS">0/17</b><span class="meter s"><i id="meterS"></i></span></div></div>
     <p class="sync" id="sync" data-state="off" role="status">Salvando neste aparelho</p>
     <button class="link" id="restore" hidden>Restaurar backup</button>
-    <div class="bk"><button class="link" id="exp">Exportar progresso</button><button class="link" id="imp">Importar progresso</button><input type="file" id="impFile" hidden></div>
+    <div class="bk"><button class="link" id="share">Enviar progresso p/ outro aparelho</button><button class="link" id="exp">Exportar progresso</button><button class="link" id="imp">Importar progresso</button><input type="file" id="impFile" hidden></div>
     <div class="tabs" role="tablist" id="tabs"></div>
     <input type="search" id="q" class="search" placeholder="Buscar no ato: ex. Striga, Snub, banca, estacionamento…" aria-label="Buscar">
     <div class="opts">
@@ -153,16 +153,30 @@ document.getElementById("impFile").onchange=async e=>{
   catch(err){alert("Arquivo inválido.")}
   e.target.value="";
 };
-// Link de importação: #importar=<bits na ordem de DATA.items, base64url>
-(function(){
+// Link de progresso: #importar=<bits na ordem de DATA.items, base64url>
+const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+function progressLink(){
+  let s="";
+  for(let i=0;i<items.length;i+=6){let v=0;for(let b=0;b<6;b++) v=(v<<1)|(items[i+b]&&got[items[i+b].id]?1:0);s+=B64[v]}
+  return location.origin+location.pathname+"?p="+Date.now().toString(36)+"#importar="+s.replace(/A+$/,"");
+}
+function importFromHash(){
   const m=location.hash.match(/importar=([A-Za-z0-9_-]+)/); if(!m) return;
-  history.replaceState(null,"",location.pathname+location.search);
-  const B64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  history.replaceState(null,"",location.pathname);
   let add=0;
   for(let i=0;i<m[1].length;i++){const v=B64.indexOf(m[1][i]);
     for(let b=0;b<6;b++) if((v>>(5-b))&1){const it=items[i*6+b]; if(it&&!got[it.id]){got[it.id]=1;add++}}}
-  save(); setTimeout(()=>alert(add+" marcações importadas."),300);
-})();
+  save(); if(typeof render==="function"&&document.getElementById("list").innerHTML) render();
+  setTimeout(()=>alert(add?add+" marcações importadas.":"Nada novo: este aparelho já tinha tudo desse link."),300);
+}
+importFromHash();
+addEventListener("hashchange",importFromHash);
+document.getElementById("share").onclick=async()=>{
+  const url=progressLink(), text="Meu progresso no Coletáveis E-Day ("+n(got)+" marcados). Abra no outro aparelho:";
+  if(navigator.share&&matchMedia("(pointer: coarse)").matches){try{await navigator.share({title:"Progresso E-Day",text,url});return}catch(e){if(e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(url);alert("Link copiado. Cole no WhatsApp e abra no outro aparelho.")}
+  catch(e){prompt("Copie este link e abra no outro aparelho:",url)}
+};
 const acts=[1,2,3,4,5];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let q="";
