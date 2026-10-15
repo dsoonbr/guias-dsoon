@@ -7,10 +7,10 @@ window.GUIAS = [
     id: "eday",
     jogo: "Gears of War: E-Day",
     titulo: "Coletáveis E-Day",
-    resumo: "140 coletáveis, 124 caixas rígidas e 17 missões secundárias, na ordem do caminho.",
+    resumo: "140 coletáveis, 125 caixas rígidas e 17 missões secundárias, na ordem do caminho.",
     caminho: "guias/eday/",
     chave: "eday-coletaveis-v1", // chave do localStorage onde o guia salva o progresso
-    total: 281,
+    total: 282,
     cor: "#b3171d"
   }
 ];

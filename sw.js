@@ -1,5 +1,5 @@
 // Suba a VERSION sempre que mudar algum arquivo, para o celular baixar a versão nova.
-const VERSION = "guias-dsoon-v1";
+const VERSION = "guias-dsoon-v2";
 const ASSETS = [
   "./",
   "index.html",
